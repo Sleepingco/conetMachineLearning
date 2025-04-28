@@ -1,0 +1,132 @@
+허깅페이스: 사전학습된 AI 모델, 데이터셋, 앱 서비스 (Spaces)를 공유·배포·활용할 수 있는 오픈 플랫폼,누구나 모델을 업로드 & 다운로드 가능,전 세계 연구자, 개발자가 협업하는nlp,vision모델의 github같은 공간
+모델의 종류로는 자연어처리,컴퓨터비전,오디오,멀티모달 등이 있음,hub에는 model,dataset,spaces 등이 있음
+
+config.json 모델 구조에 대한 메타 정보 저장
+예: 레이어 수, hidden size, attention head 수, dropout 비율 등
+tokenizer.json
+/ vocab.txt
+Tokenizer 사전 정보
+어휘 리스트 및 토큰 인코딩 방식 포함
+pytorch_model.bin
+/model.safetensors
+모델 파라미터 (가중치) 파일
+PyTorch 또는 safetensors 포맷
+special_tokens_map.json 특수 토큰 정보
+예: [CLS], [SEP], [PAD], [MASK] 등의 역할 지정
+README.md 모델 사용법, 학습 목적, 예제 코드, 평가 결과 등
+문서화된 설명 포함
+
+
+, 모든 모델을 테스트하기 위해pc에 다운받으면서하면 용량이 너무큼, 
+허깅페이스 docs로 공부가능, colab에서 연결해서 주피터 노트북 처럼사용
+, 트랜스포머 내에 파이프 라인을 불러서 모델,테스크
+"text-generation" 은,예시문,토큰,문장길이를 설정가능, 모델을 지정안하면 자동으로 불러옴,
+sentiment-analysis(긍정부정분석),zero-shot-classification(학습 데이터를 안주고 구분),ner(학습한 객체를 보여줌 나이,이름등등),question-answering(학습한 내용을 기반으로 대답함)
+summarization(긴문장을 요약),translation(번역)
+tensorflow->pytorch로 넘어가는 추세
+토크나이저를 통해 문장을 자르거나 padding,trancation이 가능하다
+Bert와 같은 일부 모델에서는 문장을 토크나이저 할때 cls101으로 시작함,sep102로 ids가 끝난다
+마스크는 긴문장은 1 짧은 문장은0으로 마스크를 지정함(틀릴경우 수정필요)
+AutoModel을 import해서 사이즈를 볼수있다.
+checkpoint = "distilbert-base-uncased-finetuned-sst-2-english"
+model = AutoModel.from_pretrained(checkpoint)
+outputs = model(**inputs)
+print(outputs.last_hidden_state.shape)
+print(outputs.logits.shape)
+print(outputs.logits) // 개념을 몰라 코드를 씀
+top_k텍스트 생성 모델에서 다음에 올 가능성이 높은 단어나 토큰을 선택하는데 사용
+전이학습 이미학습한 모델을 재활용해 새로운 문제를 해결하는 방법,
+
+기존 rnn/lstm을 대체하는 self-attention기반 트랜스포머 구조를 17년도 제안(nlp 패러다임 전환점) 인코더 디코더구조
+nlp구조에서 문장이 들어오면 문장을 여러 방법으로 문자를 인덱싱해서 토크나이징해서 임베딩 과정후 백터화 시킨후 차원수를 넓히고 실수로 만들어서 디테일하게 표현이 가능함
+
+world - level :띄어쓰기 단위 (고전적 방식), 신조어 등 사전에 없는 단어 이해 못함!
+subword-level:의미 있는 단어 조각 (BPE, WordPiece, SentencePiece)
+character-level:문자 단위
+
+bpe:가장 자주 등장하는문자쌍을 반복적으로 병합해 서브워드 생성
+->처음엔 문자 단위, 많이 나오는 쌍부터 단어로 묶음
+트랜스포머 기반모델에서는 다음과 같은 특수 토큰이 있음
+cls,sep,pad,mask,unk
+트랜스포머 인코더,디코더
+distilBert:지식정제를 통해 40%적은 메모리, 60%더 빠름
+RoBERTa:더 정교하고 큰배치와 더 오랜 훈련 데이터로 원래bert보다 크게 향상
+XLM:다국어 데이터를 활용한 사전학습
+
+t5의 주요 한계와 문제점
+모델크기와 추론 속도 문제:Encoder + Decoder → 전체 연산량 2배, 특히 추론(Inference) 시 속도 저하
+GPT 계열보다 실시간 서비스에 부적합 특히 Multi-Task Learning 시 메모리 사용량 폭증
+fine tuning 비용 문제:파라미터가 많아 태스크별 Fine-tuning 시 비용시간 매우큼
+일부 태스크에서 overkill문제:간단한 분류, NER, 벡터 추출 같은 태스크도 디코더까지 사용
+연산 낭비 발생 → BERT나 DistilBERT 등 Encoder-only 모델보다 효율 떨어짐
+출력제어 어려움:Output이 항상 자유형 텍스트 → 정형 데이터 (카테고리, 숫자 등) 출력제어가 어려움모델 신뢰성과 검증이 어려움
+
+파이프라인: 라이브러리
+
+jupyter lab --notebook-dir=c:/huggungface/hf1
+
+제로샷
+제로샷(Zero-shot)은 기계 학습 및 자연어 처리에서 각 개별 작업에 대한 특정 교육 없이
+작업을 수행할 수 있는 모델 유형
+오토클래스
+모델이나 경로만 알면 자동으로 알맞은 모델/토크나이저 클래스를 선택하여 자동으로 로드
+문장의 토큰화를 직접하고 싶을때
+from transformers import AutoTokenizer, AutoModelForMaskedLM
+# kcbert의 tokenizer와 모델을 불러옴.
+kcbert_tokenizer = AutoTokenizer.from_pretrained("beomi/kcbert-base")
+kcbert = AutoModelForMaskedLM.from_pretrained("beomi/kcbert-base")
+result = kcbert_tokenizer.tokenize("너는 내년 대선 때 투표할 수 있어?")
+print(result)
+print(kcbert_tokenizer.vocab['대선’])
+print([kcbert_tokenizer.encode(token) for token in result])
+토큰화 파인튜닝
+from transformers import AutoTokenizer
+model_name = "nlptown/bert-base-multilingual-uncased-sentiment“
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+encoding = tokenizer(["It was a very informative, fun and enjoyable time.", "It was a waste of time."])
+print(encoding)
+문장마다 input_ids 길이가 다름 (padding 없음)
+attention_mask는 실제 토큰만 1로 표시됨
+token_type_ids는 전부 0 (단일 문장이므로)
+튜닝된 파라미터 사용:
+padding=True: 가장 긴 문장에 맞춰 다른 문장도 padding
+• truncation=True: max_length보다 길면 잘라냄
+• max_length=512: 최대 길이 설정
+• return_tensors="pt": PyTorch 텐서 형태로 반환
+결과 input_ids가 동일 길이, attention_mask는 padding 위치를 0으로 처리, token_type_ids에도
+padding이 반영되어 0으로 채워짐
+
+autoclass를 이용한 파인튜닝
+파인 튜닝 없는 상태에서의 추론
+import torch
+# 감성 레이블을 숫자로 매칭하는 딕셔너리 준비
+dic = {0:'positive', 1:'neutral', 2:'negative'}# 입력 문장 데이터
+eval_list = ["I like apple", "I like pear", "I go to school", "I dislike mosquito", "I felt very sad", "I feel so
+good"]
+# 정답 레이블(answer label)
+ans = torch.tensor([0, 0, 1, 2, 2, 0])
+
+# 파인 튜닝 없는 상태에서의 추론
+# 모델을 eval 모드로 전환model.eval()
+# 그래디언트(기울기) 계산 방지. eval 모드에서는 학습이 이뤄지지 않기에 이 조치가 필요
+with torch.no_grad():
+for article in eval_list:
+# eval_list에 담긴 문장을 article이라는 변수에 하나씩 담아 토크나이저 인코딩
+inputs = tokenizer.encode(article, return_tensors="pt",padding=True, truncation=True)
+# 인코딩 결과를 모델에 투입
+outputs = model(inputs)
+# 로짓 추출
+logits = outputs.logits
+# 로짓의 최대값에 해당하는 인덱스를 추출하고, item( )을 통해 파이썬 숫자 형태로 변환
+# 결과적으로 위 숫자가 변수 dic에 담긴 인덱스가 되어 해당하는 문장의 감성을 출력
+print(f"{dic[logits.argmax(-1).item()]}:{article}")
+
+러닝메이트,인튜러스,에포크,
+인퍼런스api: 개념,주요메소드(client.text_generation() → 텍스트 생성
+• client.text_classification() → 텍스트 분류
+• client.summarization() → 요약
+• client.translation() → 번역
+• client. object_detection()→ 객체 탐지)
+detr-resnet-50 뜻
+무료 Inference API는 호출 제한이 있으므로, 429 에러 발생 시 잠시 후 재시도.
+Hugging Face 상태 페이지 또는 커뮤니티 포럼 확인
