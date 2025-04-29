@@ -1,0 +1,31 @@
+body{
+    background-color: gray;
+}
+ul{
+    border: 1px solid;
+}
+li{
+    border: 1px solid;
+    font-size: large;
+}
+h1{
+    color:blue;
+}
+p{
+    color:green;
+}
+.box{
+    width: 200px;
+    height: 100px;
+    background-color: #4caf50;
+    color: white;
+    text-align: center;
+    line-height: 100px;
+    border-radius: 10px;
+}
+.box:hover{
+    background-color: blue;
+    border: 12px solid;
+    margin: 20px;
+    padding-left: 15px;
+}
