@@ -1,0 +1,102 @@
+F1 score(조화평균)
+
+Precision과 Recall은 trade-off 관계를 적절히 고려하여 종합적 평가를 하기 위해 f1 score
+ROC curve 하단의 AUC의 면적이 높은 수치일수록 TPR이 높아져 우수한 모델
+
+회귀모델
+MAE (Mean Absolute Error)
+예측값과 실제간의 차이 모델 예측 성능
+절대값을 취하고 평균(중요) 절대 값을 취하지 않으면 최악의 경우 0이 나온다
+
+MSE Mean Squared Error 
+실제 값과 예측값의 차이를 제곱(중요) 평균한것
+MSE는 제곱으로 인해 큰 오차가 과도하게 반영될 수 있어, 이를 완화하려면 RMSE나 MAE를 사용할 수 있다.
+RMSE(Root Mean Squared Error)
+MSE 값 전체에 루트를 씌워 RMSE를 구한다.(분자인 오류값만 제곱)
+MAE보다 RMSE가 더 커지는 효과
+RMSE는 큰 오류값 차이에 대해서 크게 패널티를 주는 이점
+RMSE가 MAE보다 상대적으로 오차가 클수로 더 크게 나타나게 되어 큰 오류에 주목하도록 한다
+RMSLE(Root Mean Squared Logarithm Error)
+RMSLE는 예측값과 실제값에 log를 씌운 후 차이를 제곱하여 평균, 루트를 씌우는 방식입니다. 평균보다 큰 x값보다는, 지수적으로 큰 값에 영향 제한이 있다
+
+딥러닝은 보통 mse를 기준으로함 
+이진분류를 잘하는 모델이냐 아니야 멀티클래스 분류냐
+회귀는 x의 변화에 따라 y의 변화에 따라 
+이상치가 많이 있으면 RMSLE
+RMSE는 요청사항에 있으면 쓴다
+
+하이퍼 파라미터
+모델 학습 전에 사용자가 직접 설정해야 하는 값
+튜닝
+파라미터 값을 자동으로 바꿔가며 최적의 성능 조합을 찾는 과정
+마지막 단계 시행함
+
+구분 Grid Search / Random Search
+방식 정해진 모든 조합을 탐색 /무작위로 일부 조합만 탐색
+시간 복잡도 높음 (매우 느릴 수 있음) /낮음 (빠르게 근사 가능)
+성능 최적값 보장 가능 /근사치로도 좋은 결과 가능
+추천 상황 파라미터 조합 수가 적을 때 / 조합이 많거나 학습 시간이 길때
+
+1단계 튜닝대상 선정 모젤 선정후, 그 모델의 주요 하이퍼파리미터르를 파악
+2단계 범위 넑게잡기(coarse tuning)
+3단계 2차 fine tuning(좁은 범위로 고도화)
+4단계 교차검증 기반 평가 전략 수립
+5단계 피처 엔지니어링과 튜닝 반복
+6단계 자동 튜닝 도구 적용(고급)
+
+
+단계 설명 사용하는 함수/클래스
+1. 데이터 업로드 CSV 업로드 or 내장 데이터 불러오기 pd.read_csv(), load_iris() 등
+2. 데이터 탐색 형태, 결측치, 통계 요약 df.head(), df.info(), df.describe()
+3. 전처리 스케일링, 인코딩, 결측치 처리 StandardScaler, OneHotEncoder
+4. 특성/타겟 분리 X, y 정의 X = df.drop(), y = df['target']
+5. 데이터 분할 훈련/검증 나누기 train_test_split()
+6. 모델 선택 알고리즘 지정 RandomForestClassifier(), SVC(), KNN()
+7. 학습 모델 학습 model.fit()
+8. 예측 테스트셋 예측 model.predict()
+9. 평가 성능 측정 accuracy_score(), confusion_matrix()
+10. 교차검증 일반화 성능 확인 cross_val_score()
+11. 튜닝 최적 파라미터 찾기 GridSearchCV(), RandomizedSearchCV()
+
+시드값 샘플링에의해 값이 달라질수 있다
+
+다중 클래스 문제(예: Iris 데이터셋의 setosa, versicolor, virginica 3개 클래스)에서는 클래스 수가 3개 이상이므로, 이진 분류의 혼돈 행렬을 직접 적용하기 어렵습니다. 이를 해결하기 위해 다음과 같은 방법이 사용됩니다:
+(1)각 클래스를 긍정(Positive) 클래스로 간주하고, 나머지 모든 클래스를 부정(Negative) 클래스로 묶어 이진 분류 문제로 변환합니다.
+클래스 수 K개가 있다면, K개의 이진 분류기를 학습시킵니다.
+예: Iris 데이터셋(3 클래스)에서:
+첫 번째 분류기: setosa vs (versicolor + virginica)
+두 번째 분류기: versicolor vs (setosa + virginica)
+세 번째 분류기: virginica vs (setosa + versicolor)
+
+
+각 분류기는 해당 클래스의 확률을 출력하고, 가장 높은 확률을 가진 클래스가 최종 예측으로 선택됩니다.
+혼돈 행렬은 각 이진 분류기에 대해 개별적으로 계산할 수 있으며, 전체 혼돈 행렬은 K×K 크기로 확장됩니다.
+
+(2)모든 가능한 클래스 쌍에 대해 이진 분류기를 학습시킵니다.
+클래스 수 K개라면, 2K×(K−1)​개의 분류기가 생성됩니다.
+예: Iris 데이터셋에서:
+setosa vs versicolor
+setosa vs virginica
+versicolor vs virginica
+
+
+각 분류기의 투표(Voting)를 통해 최종 클래스를 결정합니다.
+혼돈 행렬은 각 쌍에 대해 계산될 수 있으며, 최종적으로 전체 데이터에 대한 K×K 혼돈 행렬로 집계됩니다.
+
+
+3.다중 클래스 문제에서는 혼돈 행렬이 K×K 크기로 확장됩니다. 각 셀은 다음과 같이 정의됩니다:
+대각선 요소: **True Positive (TP)**에 해당하는 경우, 즉 예측과 실제가 동일한 클래스.
+비대각선 요소: 또는 **False Negative (FN)**에 해당, 즉 예측과 실제가 다른 경우.
+
+
+예: Iris 데이터셋(3 클래스)에 대한 혼돈 행렬:
+
+예측
+| setosa | versicolor | virginica |
+실제 setosa | 10 | 0 | 0 |
+versicolor | 0 | 9 | 1 |
+virginica | 0 | 1 | 9 |
+
+setosa의 경우: 10개 모두 맞게 예측(TP: 10).
+versicolor의 경우: 9개 맞고, 1개가 virginica로 잘못 예측(FN: 1, FP: 1).
+virginica의 경우: 9개 맞고, 1개가 versicolor로 잘못 예측(FN: 1, FP: 1).
