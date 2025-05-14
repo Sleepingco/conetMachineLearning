@@ -1,0 +1,4 @@
+simple Reg vs Multivariant Reg
+L1 정규화 L2 정규화 특성값 2개면 3차원 포물선이 아니라 포물면을 그리고 y^ = w1x1+w2x2+b a:coefficient, b: intercept, wi(w1,w2,....), 경사하강법,편미분
+loss = mse + l1정규화 = mse + 시그마|wi|
+변수(특성값1) -> simple Reg 다변수(특성값 다수) -> 다항 회귀-> 상관관계 lasso/Ridge/Elastic/Polynominal
