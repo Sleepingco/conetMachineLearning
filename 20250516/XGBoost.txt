@@ -1,0 +1,117 @@
+XGBoost(eXtreme Gradient Boosting) :
+트리 기반 모델인 의사결정나무(Decision Tree) 모델의 성능을 향상시킨 알고리즘.
+자체적으로 고속 처리 알고리즘과 분산 처리 지원 기능을 제공
+Scalability(시스템이 요구하는 작업량이 증가할수록 성능이 증가) 
+Scalability(알고리즘 + 시스템)
+
+Scalable은 컴퓨팅 용어로,
+시스템이 요구하는 작업량이 증가할수록 성능이 증가하는 것을 의미.
+Scalability는 소프트웨어, 시스템, 알고리즘 등의 성능을 측정하는 척도 중 하나로,
+시스템이 요구하는 작업량이 증가할수록 성능이 증가하는 정도를 측정합니다.
+Scalability는 시스템의 용량, 성능, 자원 사용률, 지연시간 등과 관련이 있습니다.
+
+* Split finding algorithm : exact greedy algorithm > approximate algorithm
+- 메모리에 들어가지 않는 빅데이터, 분산처리 불가, 큰 소요 시간 (EGA)
+- 특정 단위별로 데이터를 분할(percentile)하여 탐색
+- 특정 단위별 병렬처리 가능(AA)
+- Global variant/local variant : 블록의 크기와 개수 지정(입실론 e:블록의 개수 지정)
+e =0.1 = 1/0.1 = 100개의 블록 지정
+
+* Sparsity aware Split finding algorithm :
+- missing data, too many zero, artifact from one hot encoding
+(결측치에 대한 자동 학습)(like one hot encoding)
+* System design for efficient computing
+- sorting전에 Column oriented sorting& indexing
+(feature별 비교분석 가능)
+* Cache memory aware access
+- 시스템의 캐쉬 메모리에 최적화된 데이터 분할 처리
+* Out of core Computing
+- IO에 따른 데이터 핸들링 Delay를 효율적으로 처리
+* Block compression
+- IO를 위한 압축과 압축해제에 따른 데이터 핸들링 Delay를 효율적으로 처리
+* Block Sharding
+- 메모리를 적절하게 분할 처리
+
+https://www.youtube.com/watch?v=VkaZXGknN3g
+
+XGBoost 응용 사례
+의료:
+질병 예측: 2024년 연구에서 XGBoost는 심장병 및 당뇨병 진단 모델에 활용되어 높은
+AUC(0.92 이상)를 달성.
+예: EHR(전자건강기록) 데이터를 이용한 조기 진단.COVID-19 관련: 환자 예후 예측 및 중증도
+분류에 사용 (2023년 논문).
+금융:
+신용 평가: 은행 및 핀테크 기업이 대출 신청자의 신용 위험 예측에 XGBoost 적용.
+예: 2024년 Kaggle 대회에서 신용 사기 탐지 모델로 활용.
+알고리즘 트레이딩: 주식 및 암호화폐 가격 예측 모델에 사용.
+자연어처리(NLP):
+텍스트 분류 및 감정 분석에서 특징 추출 후 XGBoost로 예측.
+예: 2025년 트위터 데이터 기반 실시간 감정 분석.
+환경 및 에너지:
+재생 에너지 예측: 2024년 연구에서 풍력 및 태양광 발전량 예측에 XGBoost 활용,
+기존 모델 대비 15% 향상된 RMSE.
+탄소 배출 분석: 기업의 탄소 발자국 예측 및 최적화.
+스포츠 및 게임:
+스포츠 분석: 2024년 축구 경기 결과 예측 및 선수 성과 평가에 사용 (예: EPL 데이터셋).
+e스포츠: 실시간 승률 예측 모델에 적용.
+
+https://xgboost.readthedocs.io/en/stable/parameter.html
+
+• xgboost.train() 방식
+• XGBoost 전용의 low-level API
+Parameter
+-boost : 학습할 때 사용할 모델 유형
+gbtree(tree based model, 복잡한 비선형 관계 처리에 강함)
+gblinear(linear model, 단순한 데이터에 적합)
+-silent : default 출력메시지 표시(0), 출력메시지 소거(1)
+-nthread : thread 실행 갯수(CPU), default는 전체 CPU사용
+-eta : learning_rate, 0~1, default(0.3)
+-num_boost_rounds: n_estimators
+-min_child_weight : 값이 클수록 가지치기 감소/과적합 조절
+-gamma : 트리 분할에 필요한 최소 손실 감소값, 클수록 과적합 감소, min_split_loss
+-sub_sample : 데이터 샘플링 비율(0.5 ~1)
+
+Parameter
+-lambda : L2 regularization, reg_lambda
+-alpha : L1 regularization, reg_alpha
+-scale_pos_weight : 비대칭 데이터 클래스의 세트 균형 유지
+-objective : loss 함수 정의(binary : logistic, reg : squaredlogloss,….)
+-eval_metric : 검증데이터의 평가표, MAE, RMSE, RMSLE, …
+
+reg:squarederror 평균제곱오차 (MSE) 기본값. 일반적인 회귀 문제
+reg:squaredlogerror 로그 차이의 제곱. 값이 작을수록 더
+민감
+양수 회귀 문제. log(pred+1) 형태
+사용
+reg:logistic 로지스틱 회귀 실수 확률값을 예측 (잘 사용 X)
+reg:absoluteerror 절대 오차 (L1 loss) 사용 이상치(outlier)가 많을 때
+reg:pseudohubererror Huber loss 대체.
+MSE와 MAE의 중간 형태 안정적 회귀 학습
+binary:logistic 0/1 이진 분류 (확률값 반환) 가장 많이 쓰이는 이진 분류
+binary:logitraw 로짓값(score) 출력 (확률 아님)
+후처리 없이 점수로 분류하고 싶
+을 때
+binary:hinge 힌지 손실 (0 또는 1로 직접 예측) SVM 스타일 분류 (확률 아님)
+
+2)Scikit Learn wrapper XGBoost(eXetreme Gradient Boosting)
+• Scikt Learn의 기존 estimator와 같이 fit( )와 predict( )만으로 학습과 예측이 가능
+• GridSearchCV, Pipeline 등의 유틸리티 사용이 가능
+• XGBClassifier, XGBRegressor 클래스 사용
+Parameter
+-learning_rate : eta
+-subsample : sub_sample
+-lambda : reg_lambda
+-alpha : reg_alpha
+
+3)LightGBM(Light Gradient Boosted Machine)
+XGBooster보다 적은 학습시간과 메모리 사용량
+데이터 세트가 작은 경우 과적합이 발생하기 쉬운 단점
+Parameter
+-num_iterations : n_estimators, 트리 개수, default(100)
+-learning_rate : 학습률, 0~1
+-max_depth:tree의 깊이, default(-1)
+-min_data_in_leaf : min_samples_leaf, 리프노드가 되기 위한 최소 레코드수,
+default(20)
+-num_leaves : 하나의 트리가 가질 수 있는 최대 리프 개수, default(3)
+4)CatBoost(Categorical Boost)
+Catergorical feature 처리에 중점을 둔 알고리즘
